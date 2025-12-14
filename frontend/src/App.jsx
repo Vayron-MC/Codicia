@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'; 
 import Login from './Login'; 
 
+const API_URL = 'https://codicia-production.up.railway.app/api/finanzas';
+
 function App() {
   const [session, setSession] = useState(null);
   
@@ -35,7 +37,7 @@ function App() {
   }, []);
 
   const cargarDatos = () => {
-    fetch(`http://localhost:3000/api/finanzas?fecha=${fechaFiltro}`)
+    fetch(`${API_URL}?fecha=${fechaFiltro}`)
       .then(res => res.json())
       .then(d => setData(d))
       .catch(e => console.error(e));
@@ -76,7 +78,7 @@ function App() {
     const tipoParaBD = (tipo === 'gasto_stock') ? 'gasto' : tipo;
     const prodFinal = (tipo === 'gasto') ? null : (prodId || null);
     
-    const respuesta = await fetch('http://localhost:3000/api/finanzas', {
+    const respuesta = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -92,7 +94,7 @@ function App() {
   };
 
   const procesarProducto = async () => {
-    const url = esEdicion ? `http://localhost:3000/api/finanzas/producto/${prodEditId}` : 'http://localhost:3000/api/finanzas/producto';
+    const url = esEdicion ? `${API_URL}/producto/${prodEditId}` : `${API_URL}/producto`;
     const method = esEdicion ? 'PUT' : 'POST';
     await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nuevoProd) });
     setVerProdForm(false); setEsEdicion(false); setNuevoProd({ nombre: '', precio: '', stock: '' });
@@ -101,14 +103,14 @@ function App() {
 
   const borrarProducto = async (id, nombre) => {
       if (window.confirm(`¿Borrar "${nombre}"? (Se archivará)`)) {
-          await fetch(`http://localhost:3000/api/finanzas/producto/${id}`, { method: 'DELETE' });
+          await fetch(`${API_URL}/producto/${id}`, { method: 'DELETE' });
           cargarDatos();
       }
   };
 
   const restaurarProducto = async (id, nombre) => {
       if (window.confirm(`¿Reactivar "${nombre}"?`)) {
-          await fetch(`http://localhost:3000/api/finanzas/producto/${id}/activar`, { method: 'PUT' });
+          await fetch(`${API_URL}/producto/${id}/activar`, { method: 'PUT' });
           cargarDatos();
           alert("¡Producto recuperado!");
       }
