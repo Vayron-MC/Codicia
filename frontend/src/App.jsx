@@ -11,7 +11,13 @@ function App() {
     balanceGlobal: 0, balanceDia: 0, ingresosDia: 0, gastosDia: 0, historial: [], inventario: [] 
   });
   
-  const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split('T')[0]);
+  const obtenerFechaHoyColombia = () => {
+      const fecha = new Date();
+      fecha.setHours(fecha.getHours() - 5); 
+      return fecha.toISOString().split('T')[0];
+  };
+
+  const [fechaFiltro, setFechaFiltro] = useState(obtenerFechaHoyColombia());
   const [fondo, setFondo] = useState('');
   
   const [descripcion, setDescripcion] = useState('');
@@ -120,7 +126,7 @@ function App() {
       return carrito.reduce((acc, item) => acc + item.total, 0);
   };
 
-  const obtenerFechaAjustada = () => {
+  const obtenerFechaAjustadaParaEnvio = () => {
       const fecha = new Date();
       fecha.setHours(fecha.getHours() - 5); 
       return fecha.toISOString();
@@ -142,7 +148,7 @@ function App() {
                   tipo: 'ingreso', 
                   cantidad: item.cantidad, 
                   producto_id: item.producto_id, 
-                  fecha: obtenerFechaAjustada(), 
+                  fecha: obtenerFechaAjustadaParaEnvio(), 
                   usuario: session.user.email 
                 })
             });
@@ -163,7 +169,6 @@ function App() {
     const prodFinal = (tipo === 'gasto') ? null : (prodId || null);
     
     let descripcionFinal = descripcion;
-    
     if (tipo === 'gasto_stock' && prodId) {
         const prod = data.inventario.find(p => p.id == prodId);
         descripcionFinal = `Compra de ${prod.nombre}`;
@@ -178,7 +183,7 @@ function App() {
         tipo: tipoParaBD, 
         cantidad: parseInt(cantidad), 
         producto_id: prodFinal, 
-        fecha: obtenerFechaAjustada(), 
+        fecha: obtenerFechaAjustadaParaEnvio(),
         usuario: session.user.email 
       })
     });
