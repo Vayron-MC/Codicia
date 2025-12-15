@@ -183,7 +183,7 @@ function App() {
         tipo: tipoParaBD, 
         cantidad: parseInt(cantidad), 
         producto_id: prodFinal, 
-        fecha: obtenerFechaAjustadaParaEnvio(),
+        fecha: obtenerFechaAjustadaParaEnvio(), 
         usuario: session.user.email 
       })
     });
@@ -227,7 +227,7 @@ function App() {
   if (!session) return <Login setSession={setSession} />;
 
   return (
-    <div className="min-h-screen p-6 transition-all" style={{ backgroundImage: fondo ? `url(${fondo})` : 'none', backgroundColor: '#f3f4f6', backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
+    <div className="min-h-screen p-6 transition-all" style={{ backgroundImage: fondo ? `url(${fondo})` : 'none', backgroundColor: '#f3f4f6', backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className={`max-w-7xl mx-auto p-6 rounded-xl shadow-2xl ${fondo ? 'bg-black/90 text-white' : 'bg-white text-gray-800'}`}>
         
         <header className="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
