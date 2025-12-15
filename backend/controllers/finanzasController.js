@@ -1,16 +1,28 @@
 import supabase from '../config/supabase.js';
 
 export const agregarMovimiento = async (req, res) => {
-  const { descripcion, monto, tipo, producto_id, cantidad, fecha, usuario } = req.body; 
+  let { descripcion, monto, tipo, producto_id, cantidad, fecha, usuario } = req.body; 
   const cantidadNum = parseInt(cantidad) || 0;
 
-  if (tipo === 'ingreso' && producto_id) {
+  let fechaFinal = fecha ? new Date(fecha) : new Date();
+  fechaFinal.setHours(fechaFinal.getHours() - 5); 
+
+  if (producto_id) {
     const { data: prod } = await supabase.from('productos').select('stock, nombre').eq('id', producto_id).single();
     
-    if (prod.stock < cantidadNum) {
-      return res.status(400).json({ 
-        error: `STOCK INSUFICIENTE: Solo hay ${prod.stock} unidades de ${prod.nombre}.` 
-      });
+    if (prod) {
+        if (tipo === 'ingreso' && prod.stock < cantidadNum) {
+          return res.status(400).json({ 
+            error: `STOCK INSUFICIENTE: Solo hay ${prod.stock} unidades de ${prod.nombre}.` 
+          });
+        }
+
+        if (tipo !== 'ingreso') {
+           descripcion = `Compra de ${prod.nombre}`;
+        }
+        else if (tipo === 'ingreso' && !descripcion) {
+           descripcion = `Venta de ${prod.nombre}`;
+        }
     }
   }
 
@@ -22,7 +34,7 @@ export const agregarMovimiento = async (req, res) => {
       tipo, 
       producto_id, 
       cantidad: cantidadNum, 
-      creado_en: fecha || new Date(),
+      creado_en: fechaFinal, 
       usuario: usuario || 'sistema' 
     }])
     .select();
@@ -45,6 +57,7 @@ export const agregarMovimiento = async (req, res) => {
 export const obtenerResumen = async (req, res) => {
   const { fecha } = req.query;
   const fechaBase = fecha ? new Date(fecha + 'T00:00:00') : new Date();
+  
   const inicioDia = new Date(fechaBase); inicioDia.setHours(0,0,0,0);
   const finDia = new Date(fechaBase); finDia.setHours(23,59,59,999);
 
@@ -54,7 +67,6 @@ export const obtenerResumen = async (req, res) => {
   let ingresosDia = 0;
   let gastosDia = 0;
   let historialDia = [];
-
   let balanceGlobal = 0;
 
   if (movimientos) {
@@ -78,7 +90,7 @@ export const obtenerResumen = async (req, res) => {
     balanceDia: ingresosDia - gastosDia,
     ingresosDia,
     gastosDia,
-    historial: historialDia.reverse(),
+    historial: historialDia.reverse(), 
     inventario
   });
 };
